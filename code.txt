@@ -1,0 +1,179 @@
+int m1=7;
+int m2=6;
+int m3=4;
+int m4=5;
+int f=3;
+int g=A5;
+int pump=A4;
+int buzzer=A0;
+#include <SimpleDHT.h>
+int pinDHT11 = 2;
+SimpleDHT11 dht11(pinDHT11);
+
+void setup()
+{
+  pinMode(f,INPUT);
+  pinMode(g,INPUT);
+ pinMode(m1,OUTPUT);
+ pinMode(m2,OUTPUT);
+ pinMode(m3,OUTPUT);
+ pinMode(m4,OUTPUT);
+ pinMode(pump,OUTPUT);
+ pinMode(buzzer,OUTPUT);
+ digitalWrite(m1,LOW);
+ digitalWrite(m2,LOW);
+ digitalWrite(m3,LOW);
+ digitalWrite(m4,LOW);
+ digitalWrite(pump,HIGH);
+ digitalWrite(buzzer,HIGH);
+ Serial.begin(9600);
+}
+
+void loop()
+{
+
+byte temperature = 0;
+  byte humidity = 0;
+  int err = SimpleDHTErrSuccess;
+  if ((err = dht11.read(&temperature, &humidity, NULL)) != SimpleDHTErrSuccess) 
+  {
+   // Serial.print("Read DHT11 failed, err="); Serial.print(SimpleDHTErrCode(err));
+   // Serial.print(","); Serial.println(SimpleDHTErrDuration(err)); delay(1000);
+    return;
+  }
+
+//Serial.print((int)temperature); Serial.print(" *C, "); 
+// Serial.print((int)humidity); Serial.println(" H");
+  int temp=((int)temperature);
+  int hum=((int)humidity);
+  delay(15);
+  
+if(temp>30)
+{
+digitalWrite(buzzer,LOW);
+delay(100);
+digitalWrite(buzzer,HIGH);
+delay(100);  
+Serial.println("ALERT HIGH TEMPERATURE");
+delay(100);  
+digitalWrite(buzzer,LOW);
+delay(100);
+digitalWrite(buzzer,HIGH);
+delay(100);
+}
+
+int fval=digitalRead(f);
+delay(1);
+int gval=digitalRead(g);
+delay(1);
+
+  if(fval==LOW)
+  {
+  digitalWrite(buzzer,LOW);
+  delay(100);
+  digitalWrite(buzzer,HIGH);delay(100);  
+  Serial.println("ALERT FIRE DETECTED");
+  delay(10); 
+  Serial.print((int)temperature);
+  Serial.print(" *C, "); 
+  Serial.print((int)humidity); 
+  Serial.println(" H");
+
+  }
+
+  if(gval==LOW)
+  {
+  digitalWrite(buzzer,LOW);
+  delay(100);
+  digitalWrite(buzzer,HIGH);
+  delay(100);  
+  Serial.println("ALERT SMOKE DETECTED");
+  delay(10);
+  Serial.print((int)temperature); 
+  Serial.print(" *C, "); 
+  Serial.print((int)humidity); 
+  Serial.println(" H");
+
+  }
+
+ 
+while(Serial.available())
+{
+String iot=Serial.readString();
+delay(1);
+if(iot[0]=='2' || iot[0]=='F' || iot[0]=='f')
+{
+Serial.println("FRONT");
+delay(500);  
+digitalWrite(m1,HIGH);
+digitalWrite(m2,LOW);
+digitalWrite(m3,HIGH);
+digitalWrite(m4,LOW);    
+}
+else if(iot[0]=='5' || iot[0]=='S' || iot[0]=='s')
+{
+Serial.println("STOP");
+delay(500);  
+digitalWrite(m1,LOW);
+digitalWrite(m2,LOW);
+digitalWrite(m3,LOW);
+digitalWrite(m4,LOW);  
+}
+else if(iot[0]=='8' || iot[0]=='b' || iot[0]=='B')
+{
+Serial.println("BACK");
+delay(500);  
+digitalWrite(m1,LOW);
+digitalWrite(m2,HIGH);
+digitalWrite(m3,LOW);
+digitalWrite(m4,HIGH);  
+}
+else if(iot[0]=='4' || iot[0]=='L' || iot[0]=='l')
+{
+Serial.println("LEFT");
+delay(500);  
+digitalWrite(m1,HIGH);
+digitalWrite(m2,LOW);
+digitalWrite(m3,LOW);
+digitalWrite(m4,HIGH);
+delay(2000);
+digitalWrite(m1,LOW);
+digitalWrite(m2,LOW);
+digitalWrite(m3,LOW);
+digitalWrite(m4,LOW);  
+}
+else if(iot[0]=='6' || iot[0]=='R' || iot[0]=='r')
+{
+Serial.println("RIGHT");
+delay(500);  
+digitalWrite(m1,LOW);
+digitalWrite(m2,HIGH);
+digitalWrite(m3,HIGH);
+digitalWrite(m4,LOW);
+delay(2000);
+digitalWrite(m1,LOW);
+digitalWrite(m2,LOW);
+digitalWrite(m3,LOW);
+digitalWrite(m4,LOW);  
+}
+else if(iot[0]=='1' || iot[0]=='P')
+{
+Serial.println("PUMP ON");
+delay(500);  
+digitalWrite(pump,LOW);
+delay(200);
+}
+else if(iot[0]=='0' || iot[0]=='p')
+{
+Serial.println("PUMP OFF");
+delay(500);  
+digitalWrite(pump,HIGH);
+delay(200);
+}
+Serial.print((int)temperature); 
+Serial.print(" *C, "); 
+Serial.print((int)humidity); 
+Serial.println(" H");
+
+}
+}
